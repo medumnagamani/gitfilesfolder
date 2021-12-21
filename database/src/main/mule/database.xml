@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d9e2886a-e345-47a6-8014-ef4ed5f8a9c1" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="9a7354ae-5b1c-46eb-b1ac-6a7963d5ca1e" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="Mehernaga@123" database="employeedata" />
+	</db:config>
+	<db:config name="Database_Config1" doc:name="Database Config" doc:id="8264c81e-5527-4f40-809b-87c56bb5fbf3" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="Mehernaga@123" database="employeedata" />
+	</db:config>
+	<db:config name="Database_Config2" doc:name="Database Config" doc:id="5b222da1-363d-4be6-9af7-466fe9071f82" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="Mehernaga@123" database="employeedata" />
+	</db:config>
+	<flow name="databaseFlow" doc:id="ac7f2daf-816b-49b2-a8f1-dbac143267db" >
+		<http:listener doc:name="Listener" doc:id="86943cfe-162a-4ac8-a33a-27871a582e0b" config-ref="HTTP_Listener_config" path="/database"/>
+		<ee:transform doc:name="Transform Message" doc:id="2f81d5c9-068e-4ea4-8f4c-2f412d0b710e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+1 to 200 map{
+	"empid" : 100 + $$,
+	"empname" : "naga",
+	"empage" : "30",
+	"empaddress" : "kurnool"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="8b759069-26c9-4c48-b07a-3c5e997091f9" >
+			<logger level="INFO" doc:name="Logger" doc:id="c840b98e-f27d-49a7-a2e3-58fb620a4fea" message="#[payload]" />
+			<db:insert doc:name="Insert" doc:id="ada5610e-0744-427a-80fd-904faed5af83" config-ref="Database_Config2">
+				<db:sql ><![CDATA[insert into emp(empid,empname,empage,empaddress)values(:empid,:empname,:empage,:empaddress);]]></db:sql>
+				<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
+			</db:insert>
+		</foreach>
+	</flow>
+</mule>
